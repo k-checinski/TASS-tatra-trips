@@ -1,0 +1,342 @@
+[
+  {
+    "name": "wygodny",
+    "weight": "1"
+  },
+  {
+    "name": "świetny",
+    "weight": "3"
+  },
+  {
+    "name": "wspaniały",
+    "weight": "3"
+  },
+  {
+    "name": "cudowny",
+    "weight": "3"
+  },
+  {
+    "name": "malowniczy",
+    "weight": "2"
+  },
+  {
+    "name": "piękny",
+    "weight": "3"
+  },
+  {
+    "name": "ujmujący",
+    "weight": "2"
+  },
+  {
+    "name": "urzekający",
+    "weight": "2"
+  },
+  {
+    "name": "zadziwiający",
+    "weight": "3"
+  },
+  {
+    "name": "zapierający dech w piersiach",
+    "weight": "3"
+  },
+  {
+    "name": "oszałamiający",
+    "weight": "3"
+  },
+  {
+    "name": "zdumiewający",
+    "weight": "2"
+  },
+  {
+    "name": "ładny",
+    "weight": "1"
+  },
+  {
+    "name": "prosty",
+    "weight": "1"
+  },
+  {
+    "name": "łagodny",
+    "weight": "1"
+  },
+  {
+    "name": "sympatyczny",
+    "weight": "1"
+  },
+  {
+    "name": "urokliwy",
+    "weight": "2"
+  },
+  {
+    "name": "majestatyczny",
+    "weight": "2"
+  },
+  {
+    "name": "miły",
+    "weight": "1"
+  },
+  {
+    "name": "dobry",
+    "weight": "1"
+  },
+  {
+    "name": "ciekawy",
+    "weight": "1"
+  },
+  {
+    "name": "przyjemny",
+    "weight": "1"
+  },
+  {
+    "name": "bezpieczny",
+    "weight": "1"
+  },
+  {
+    "name": "znakomity",
+    "weight": "2"
+  },
+  {
+    "name": "cudny",
+    "weight": "2"
+  },
+  {
+    "name": "ambitny",
+    "weight": "1"
+  },
+  {
+    "name": "piękno",
+    "weight": "1"
+  },
+  {
+    "name": "widowiskowy",
+    "weight": "2"
+  },
+  {
+    "name": "warto",
+    "weight": "1"
+  },
+  {
+    "name": "ekstra",
+    "weight": "2"
+  },
+  {
+    "name": "genialny",
+    "weight": "2"
+  },
+  {
+    "name": "ulubiony",
+    "weight": "1"
+  },
+  {
+    "name": "sielanka",
+    "weight": "2"
+  },
+  {
+    "name": "super",
+    "weight": "2"
+  },
+  {
+    "name": "fantastyczny",
+    "weight": "3"
+  },
+  {
+    "name": "urzekać",
+    "weight": "2"
+  },
+  {
+    "name": "niezapomniany",
+    "weight": "2"
+  },
+  {
+    "name": ":D",
+    "weight": "1"
+  },
+  {
+    "name": ":)",
+    "weight": "1"
+  },
+  {
+    "name": ";)",
+    "weight": "1"
+  },
+  {
+    "name": ";D",
+    "weight": "1"
+  },
+  {
+    "name": "bylejaki",
+    "weight": "-1"
+  },
+  {
+    "name": "koszmar",
+    "weight": "-3"
+  },
+  {
+    "name": "klapa",
+    "weight": "-2"
+  },
+  {
+    "name": "zawód",
+    "weight": "-2"
+  },
+  {
+    "name": "rozczarowywwujący",
+    "weight": "-2"
+  },
+  {
+    "name": "rozczarowanie",
+    "weight": "-2"
+  },
+  {
+    "name": "głupi",
+    "weight": "-1"
+  },
+  {
+    "name": "koszmarny",
+    "weight": "-3"
+  },
+  {
+    "name": "beznadziejny",
+    "weight": "-3"
+  },
+  {
+    "name": "zbyt trudny",
+    "weight": "-2"
+  },
+  {
+    "name": "nieprzygotowany",
+    "weight": "-2"
+  },
+  {
+    "name": "brzydki",
+    "weight": "-1"
+  },
+  {
+    "name": "okropny",
+    "weight": "-2"
+  },
+  {
+    "name": "zły",
+    "weight": "-1"
+  },
+  {
+    "name": "mógłby być lepszy",
+    "weight": "-1"
+  },
+  {
+    "name": "nudny",
+    "weight": "-1"
+  },
+  {
+    "name": "zatłoczony",
+    "weight": "-1"
+  },
+  {
+    "name": "nieciekawy",
+    "weight": "-1"
+  },
+  {
+    "name": "zwyczajny",
+    "weight": "-1"
+  },
+  {
+    "name": "wstrętny",
+    "weight": "-3"
+  },
+  {
+    "name": "bolesny",
+    "weight": "-2"
+  },
+  {
+    "name": "niekorzystny",
+    "weight": "-1"
+  },
+  {
+    "name": "agresywny",
+    "weight": "-1"
+  },
+  {
+    "name": "przerażający",
+    "weight": "-3"
+  },
+  {
+    "name": "paskudny",
+    "weight": "-2"
+  },
+  {
+    "name": "straszny",
+    "weight": "-2"
+  },
+  {
+    "name": "nieprzyjemny",
+    "weight": "-1"
+  },
+  {
+    "name": "niebezpieczny",
+    "weight": "-2"
+  },
+  {
+    "name": "groźny",
+    "weight": "-2"
+  },
+  {
+    "name": "przytłaczający",
+    "weight": "-2"
+  },
+  {
+    "name": "tłumny",
+    "weight": "-1"
+  },
+  {
+    "name": "strata czasu",
+    "weight": "-2"
+  },
+  {
+    "name": "niewygodny",
+    "weight": "-1"
+  },
+  {
+    "name": "histeria",
+    "weight": "-3"
+  },
+  {
+    "name": "przeciętny",
+    "weight": "-1"
+  },
+  {
+    "name": "wredny",
+    "weight": "-2"
+  },
+  {
+    "name": "upierdliwy",
+    "weight": "-2"
+  },
+  {
+    "name": "monotonny",
+    "weight": "-1"
+  },
+  {
+    "name": "mozolny",
+    "weight": "-1"
+  },
+  {
+    "name": "uciążliwy",
+    "weight": "-2"
+  },
+  {
+    "name": ":C",
+    "weight": "-1"
+  },
+  {
+    "name": ";C",
+    "weight": "-1"
+  },
+  {
+    "name": ":(",
+    "weight": "-1"
+  },
+  {
+    "name": ";(",
+    "weight": "-1"
+  }
+]
