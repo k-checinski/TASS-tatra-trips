@@ -49,14 +49,25 @@ def analyse_answer(text: str, sentiment_dict: Dict[str, int], morf: morfeusz2.Mo
     return sentiment_score(lemmas, sentiment_dict, verbose)
 
 
+def analyse_thread(thread: dict, sentiment_dict: Dict[str, int], morf: morfeusz2.Morfeusz, verbose=False):
+    answers = thread['answers']
+    final_score = 0
+    for answer in answers:
+        score = analyse_answer(answer['content'], sentiment_dict, morf, verbose)
+        if verbose:
+            print('Answer score:\t', score)
+        final_score += score
+    if verbose:
+        print('Final score:\t', final_score)
+    return final_score
+
+
 def main():
     morf = morfeusz2.Morfeusz()
     sem_dict = load_sentiment_dict(sys.argv[1])
     with open(sys.argv[2], 'r') as file:
         thread = json.load(file)
-    text = thread['answers'][0]['content']
-    score = analyse_answer(text, sem_dict, morf, True)
-    print("score:\t", score)
+    score = analyse_thread(thread, sem_dict, morf, True)
 
 
 if __name__ == "__main__":
