@@ -43,17 +43,17 @@ def sentiment_score(lemmas_list: List[List[str]], sentiment_dict: Dict[str, int]
     return sum([position_sentiment_score(lemmas_group, sentiment_dict, verbose) for lemmas_group in lemmas_list])
 
 
-def analyse_answer(text: str, sentiment_dict: Dict[str, int], morf: morfeusz2.Morfeusz, verbose=False):
+def answer_sentiment_score(text: str, sentiment_dict: Dict[str, int], morf: morfeusz2.Morfeusz, verbose=False):
     analysis = morf.analyse(text)
     lemmas = lemmas_list(analysis)
     return sentiment_score(lemmas, sentiment_dict, verbose)
 
 
-def analyse_thread(thread: dict, sentiment_dict: Dict[str, int], morf: morfeusz2.Morfeusz, verbose=False):
+def thread_sentiment_score(thread: dict, sentiment_dict: Dict[str, int], morf: morfeusz2.Morfeusz, verbose=False):
     answers = thread['answers']
     final_score = 0
     for answer in answers:
-        score = analyse_answer(answer['content'], sentiment_dict, morf, verbose)
+        score = answer_sentiment_score(answer['content'], sentiment_dict, morf, verbose)
         if verbose:
             print('Answer score:\t', score)
         final_score += score
@@ -67,7 +67,7 @@ def main():
     sem_dict = load_sentiment_dict(sys.argv[1])
     with open(sys.argv[2], 'r') as file:
         thread = json.load(file)
-    score = analyse_thread(thread, sem_dict, morf, True)
+    score = thread_sentiment_score(thread, sem_dict, morf, True)
 
 
 if __name__ == "__main__":
