@@ -24,11 +24,11 @@ def main():
 
             object_name = row["nazwa główna"]
 
-            if object_name in distinct_names:
+            if object_name in distinct_names or object_name in constants.REJECTED_OBJECTS:
                 continue
 
             object_type = row["rodzaj obiektu"]
-            if object_type in constants.REJECTED_OBJECT_TYPES:
+            if not set(object_type.split(':')).isdisjoint(constants.REJECTED_OBJECT_TYPES):
                 continue
 
             object_latitude = row["szerokość geograficzna"]
