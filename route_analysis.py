@@ -1,11 +1,15 @@
 from typing import Set, List
+
+import numpy as np
+import matplotlib.pyplot as plt
+
 import morfeusz2
 from pl_stemmer import stem
 
 
 def is_sufficient(prepared_tuple):
     part_of_speech = prepared_tuple[1].split(':')[0]
-    return part_of_speech in ['adj', 'ign']
+    return part_of_speech in ['ign']
 
 
 def prepare_objects(terms):
@@ -50,33 +54,80 @@ def prepare_text(text: str, morf: morfeusz2.Morfeusz) -> List[Set[str]]:
             lemma = stem(lemma)
         lemma = ''.join(c for c in lemma if c.isalnum())
         if len(lemma) > 0:
-            current_set.add(lemma)
+            current_set.add(lemma.lower())
     return sets
 
 
 def find_next_object(text_lemmas_sets, start_pos, objects_dict):
     matches = []
-    min_length = 0
     for object in objects_dict:
         current_pos = start_pos
-        all_matched = True
+        match_count = 0
         sufficient_matched = False
         for keyword in object['keywords']:
             overlap = not keyword[0].isdisjoint(text_lemmas_sets[current_pos])
-            if overlap and keyword[1]:
-                sufficient_matched = True
-                break
-            if not overlap:
-                all_matched = False
+            if overlap:
+                match_count += 1
+                if keyword[1]:
+                    sufficient_matched = True
             current_pos += 1
             if current_pos >= len(text_lemmas_sets):
-                all_matched = False
                 break
-        if all_matched or sufficient_matched:
-            matches.append(object)
-            if len(object['keywords']) < min_length or min_length == 0:
-                min_length = len(object['keywords'])
-    return matches, start_pos + min_length
+        if match_count == len(object['keywords']) or sufficient_matched:
+            matches.append((object, match_count))
+    return matches
+
+
+def dist(a, b):
+    return (a[0] - b[0])**2 + (a[1] - b[1])**2
+
+
+def get_coords(obj):
+    return obj['latitude'], obj['longitude']
+
+
+def filter_variants(route):
+    if len(route) == 0:
+        return []
+    filtered_route = [route[0][0]]
+    for elem in route[1:]:
+        if len(elem) == 1:
+            filtered_route.append(elem[0])
+            continue
+        prev_coords = get_coords(filtered_route[-1])
+        distances = [dist(prev_coords, get_coords(variant)) for variant in elem]
+        nearest = elem[np.argmax(distances)]
+        filtered_route.append(nearest)
+    return filtered_route
+
+
+def find_route(text, objects_dict, filter_multiple_matches=True):
+    pos = 0
+    morf = morfeusz2.Morfeusz()
+    sets = prepare_text(text, morf)
+    route = []
+    while pos < len(sets):
+        matches = find_next_object(sets, pos, objects_dict)
+        if len(matches) == 0:
+            pos += 1
+            continue
+        objects, lengths = zip(*matches)
+        max_length = max(lengths)
+        pos += max_length
+        route.append([m[0] for m in matches if m[1] == max_length])
+    if filter_multiple_matches:
+        route = filter_variants(route)
+    return route
+
+
+def draw_route(objects):
+    xs = []
+    ys = []
+    for obj in objects:
+        xs.append(obj['longitude'])
+        ys.append(obj['latitude'])
+    plt.plot(xs, ys, '-o')
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -84,14 +135,12 @@ if __name__ == '__main__':
     with open('resources/geo.json', 'r') as file:
         objs = json.load(file)
     prep = prepare_objects(objs)
-    with open('threads/0_5007.json') as file:
+    with open('threads/12_4820.json') as file:
         thread = json.load(file)
     text = thread['answers'][0]['content']
     print(text)
-    sets = prepare_text(text, morfeusz2.Morfeusz())
-    print(sets[58:70])
-    result = find_next_object(sets[58:70], 0, prep)
-    for obj in result[0]:
-        print(obj)
+    route = find_route(text, prep)
+    draw_route(route)
 
-# TODO obliczanie długości dopasowania i zwracanie jej w krotce wyniku
+    for elem in route:
+        print(elem)
