@@ -5,7 +5,6 @@
 
 
 def stem(word):
-    word = word.lower()
     st = word[:]
     st = remove_nouns(st)
     st = remove_diminutive(st)
