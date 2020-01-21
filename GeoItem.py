@@ -11,9 +11,10 @@ class GeoItem:
     @staticmethod
     def parse_coordination_string(coord):
         coord_string = coord.split('\'')[0]
-        integer_part = coord_string.split('°')[0]
-        fraction_part = coord_string.split('°')[1]
-        return int(integer_part) + int(fraction_part) * 0.01
+        degrees = int(coord_string.split('°')[0])
+        minutes = int(coord_string.split('°')[1])
+        seconds = int(coord.split('\'')[1]) if len(coord.split('\'')) > 1 else 0
+        return degrees + minutes / 60 + seconds / 3600
 
     def is_located_in_tatra_region(self):
         return constants.MIN_LATITUDE < self.latitude < constants.MAX_LATITUDE \
