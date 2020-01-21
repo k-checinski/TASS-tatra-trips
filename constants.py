@@ -8,7 +8,7 @@ REJECTED_OBJECT_TYPES = ['pole', 'pola', 'las', 'część lasu', 'góry', 'skał
                          'pogórze', 'rejon etnograficzny', 'pasmo górskie', 'torfowiska', 'uroczysko-dawna miejscowość',
                          'bagno', 'jar', 'cyrk lodowcowy', 'błoto', 'sztuczny zbiornik wodny', 'piarg', 'półwysep',
                          'wywierzysko', 'błota', 'inny obiekt[3]', 'inny obiekt[5]', 'próg', 'park', 'polana', 'potok',
-                         'łąki', 'łąka', 'urwisko']
+                         'łąki', 'łąka', 'urwisko', 'skały']
 
 REJECTED_OBJECTS = ["Szczyt", "Góra Szlagowa", "Szczyty", "Koło", "Wysokie", "Kopa", "Góra", "Żleb Drége’a", "Dolina"]
 SLOVAKIA_CODE = 'SK'
