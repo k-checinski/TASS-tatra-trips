@@ -1,4 +1,5 @@
 from typing import Set, List
+from math import sqrt
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,11 +10,12 @@ from pl_stemmer import stem
 
 def is_sufficient(prepared_tuple):
     part_of_speech = prepared_tuple[1].split(':')[0]
-    return part_of_speech in ['ign']
+    return part_of_speech in ['ign'] or 'nazwa_geograficzna' in prepared_tuple[2]
 
 
 def prepare_objects(terms):
     morf = morfeusz2.Morfeusz()
+    print(morf.dict_id())
     prepared_objects = []
     for term in terms:
         words = term['name'].split(' ')
@@ -21,7 +23,7 @@ def prepare_objects(terms):
         prepared_words = []
         for word_result in words_results:
             info = process_word(word_result)
-            prepared_result = [(w[1], w[2].split(':')[0]) for w in info]
+            prepared_result = [(w[1], w[2].split(':')[0], w[3]) for w in info]
             forms = set([r[0].split(':')[0].lower() for r in prepared_result])
             prepared_words.append((forms, any([is_sufficient(t) for t in prepared_result])))
         prepared_objects.append({'name': term['name'], 'keywords': prepared_words, 'type': term['type'],
@@ -43,13 +45,18 @@ def prepare_text(text: str, morf: morfeusz2.Morfeusz) -> List[Set[str]]:
     sets = []
     current_set = set()
     for morf_tuple in analysed_text:
+        part_of_speech = morf_tuple[2][2].split(':')[0]
+        if part_of_speech in ['interj', 'conj', 'part', 'siebie',
+                              'fin', 'bedzie', 'aglt', 'impt', 'imps',
+                              'inf', 'winien', 'pred', 'prep', 'comp',
+                              'interj', 'interp']:
+            continue
         if morf_tuple[0] != pos:
             if len(current_set) != 0:
                 sets.append(current_set)
                 current_set = set()
             pos = morf_tuple[0]
         lemma = morf_tuple[2][1].split(':')[0]
-        part_of_speech = morf_tuple[2][2].split(':')[0]
         if part_of_speech == 'ign':
             lemma = stem(lemma)
         lemma = ''.join(c for c in lemma if c.isalnum())
@@ -79,7 +86,7 @@ def find_next_object(text_lemmas_sets, start_pos, objects_dict):
 
 
 def dist(a, b):
-    return (a[0] - b[0])**2 + (a[1] - b[1])**2
+    return sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
 
 
 def get_coords(obj):
@@ -101,15 +108,17 @@ def filter_variants(route):
     return filtered_route
 
 
-def filter_objects(route):
+def filter_far_objects(route, min_filtering_distance=10000.0):
     if len(route) == 0:
         return []
     filtered_route = [route[0]]
     for a, b in zip(route[1:], route[2:]):
-        a_coord = get_coords(a)
+        a_coords = get_coords(a)
         b_coords = get_coords(b)
         prev_coords = get_coords(filtered_route[-1])
-        if dist(prev_coords, a_coord) < dist(prev_coords, b_coords):
+        a_prev_dist = dist(prev_coords, a_coords)
+        print(a_prev_dist, a['name'], b['name'])
+        if a_prev_dist < dist(prev_coords, b_coords) or a_prev_dist < min_filtering_distance:
             filtered_route.append(a)
     filtered_route.append(route[-1])
     return filtered_route
@@ -125,7 +134,8 @@ def filter_duplicates(route, window_size=1):
     return filtered_route
 
 
-def find_route(text, objects_dict, filter_multiple_matches=True):
+def find_route(text, objects_dict, duplicates_filtering_window=0,
+               far_objects_filtering_dist=0):
     pos = 0
     morf = morfeusz2.Morfeusz()
     sets = prepare_text(text, morf)
@@ -139,9 +149,11 @@ def find_route(text, objects_dict, filter_multiple_matches=True):
         max_length = max(lengths)
         pos += max_length
         route.append([m[0] for m in matches if m[1] == max_length])
-    if filter_multiple_matches:
-        route = filter_variants(route)
-    route = filter_duplicates(route, 2)
+    route = filter_variants(route)
+    if far_objects_filtering_dist > 0:
+        route = filter_far_objects(route, far_objects_filtering_dist)
+    if duplicates_filtering_window != 0:
+        route = filter_duplicates(route, duplicates_filtering_window)
     return route
 
 
@@ -168,12 +180,11 @@ if __name__ == '__main__':
     with open('resources/geo.json', 'r') as file:
         objs = json.load(file)
     prep = prepare_objects(objs)
-    with open('threads/2_4975.json') as file:
+    with open('threads/19_4774.json') as file:
         thread = json.load(file)
     text = thread['answers'][0]['content']
     # text = "Wyruszyliśmy z Kuźnic, przez Dolinę Jaworzynki dotarliśmy do Murowańca i dalej nad Czarny Staw Gąsienicowy. " \
-    # "Wdrapaliśmy się na Karb, zdobyliśmy Kościelec i zeszliśmy z Karba po drugiej stronie. " \
-    # "Następnie wróciliśmy przez Murowaniec i Boczań do Kuźnic."
+    # "Wdrapaliśmy się na Karb, zdobyliśmy Kościelec i zeszliśmy na Karb i drugą stroną wróciliśmy przez Murowaniec i Boczań do Kuźnic."
     print(text)
     route = find_route(text, prep)
     draw_route(route)
@@ -181,8 +192,8 @@ if __name__ == '__main__':
     for elem in route:
         print(elem)
     print('FILTERED')
-    route = filter_objects(route)
-    route = filter_duplicates(route, 2)
+
+    route = filter_duplicates(route, 1)
     draw_route(route)
 
     for elem in route:
