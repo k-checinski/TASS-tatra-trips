@@ -24,7 +24,7 @@ def prepare_objects(terms):
             prepared_result = [(w[1], w[2].split(':')[0]) for w in info]
             forms = set([r[0].split(':')[0].lower() for r in prepared_result])
             prepared_words.append((forms, any([is_sufficient(t) for t in prepared_result])))
-        prepared_objects.append({'keywords': prepared_words, 'type': term['type'],
+        prepared_objects.append({'name': term['name'], 'keywords': prepared_words, 'type': term['type'],
                                  'latitude': term['latitude'], 'longitude': term['longitude']})
     return prepared_objects
 
@@ -96,7 +96,7 @@ def filter_variants(route):
             continue
         prev_coords = get_coords(filtered_route[-1])
         distances = [dist(prev_coords, get_coords(variant)) for variant in elem]
-        nearest = elem[np.argmax(distances)]
+        nearest = elem[np.argmin(distances)]
         filtered_route.append(nearest)
     return filtered_route
 
@@ -112,6 +112,16 @@ def filter_objects(route):
         if dist(prev_coords, a_coord) < dist(prev_coords, b_coords):
             filtered_route.append(a)
     filtered_route.append(route[-1])
+    return filtered_route
+
+
+def filter_duplicates(route, window_size=1):
+    if len(route) < window_size:
+        return route
+    filtered_route = route[:window_size]
+    for object in route[window_size:]:
+        if not object['name'] in [o['name'] for o in filtered_route[-window_size:]]:
+            filtered_route.append(object)
     return filtered_route
 
 
@@ -131,6 +141,7 @@ def find_route(text, objects_dict, filter_multiple_matches=True):
         route.append([m[0] for m in matches if m[1] == max_length])
     if filter_multiple_matches:
         route = filter_variants(route)
+    route = filter_duplicates(route, 2)
     return route
 
 
@@ -149,16 +160,21 @@ if __name__ == '__main__':
     with open('resources/geo.json', 'r') as file:
         objs = json.load(file)
     prep = prepare_objects(objs)
-    with open('threads/26_4699.json') as file:
+    with open('threads/2_4975.json') as file:
         thread = json.load(file)
     text = thread['answers'][0]['content']
+    # text = "Wyruszyliśmy z Kuźnic, przez Dolinę Jaworzynki dotarliśmy do Murowańca i dalej nad Czarny Staw Gąsienicowy. " \
+    # "Wdrapaliśmy się na Karb, zdobyliśmy Kościelec i zeszliśmy z Karba po drugiej stronie. " \
+    # "Następnie wróciliśmy przez Murowaniec i Boczań do Kuźnic."
     print(text)
     route = find_route(text, prep)
+    draw_route(route)
 
     for elem in route:
         print(elem)
     print('FILTERED')
     route = filter_objects(route)
+    route = filter_duplicates(route, 2)
     draw_route(route)
 
     for elem in route:
