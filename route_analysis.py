@@ -148,10 +148,18 @@ def find_route(text, objects_dict, filter_multiple_matches=True):
 def draw_route(objects):
     xs = []
     ys = []
+    names = []
     for obj in objects:
         xs.append(obj['longitude'])
         ys.append(obj['latitude'])
+        names.append(obj['name'])
     plt.plot(xs, ys, '-o')
+    for x, y, label in zip(xs, ys, names):
+        plt.annotate(label,  # this is the text
+                     (x, y),  # this is the point to label
+                     textcoords="offset points",  # how to position the text
+                     xytext=(0, 10),  # distance from text to points (x,y)
+                     ha='center')
     plt.show()
 
 
