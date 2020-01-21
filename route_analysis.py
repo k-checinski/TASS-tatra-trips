@@ -101,6 +101,20 @@ def filter_variants(route):
     return filtered_route
 
 
+def filter_objects(route):
+    if len(route) == 0:
+        return []
+    filtered_route = [route[0]]
+    for a, b in zip(route[1:], route[2:]):
+        a_coord = get_coords(a)
+        b_coords = get_coords(b)
+        prev_coords = get_coords(filtered_route[-1])
+        if dist(prev_coords, a_coord) < dist(prev_coords, b_coords):
+            filtered_route.append(a)
+    filtered_route.append(route[-1])
+    return filtered_route
+
+
 def find_route(text, objects_dict, filter_multiple_matches=True):
     pos = 0
     morf = morfeusz2.Morfeusz()
@@ -135,11 +149,16 @@ if __name__ == '__main__':
     with open('resources/geo.json', 'r') as file:
         objs = json.load(file)
     prep = prepare_objects(objs)
-    with open('threads/12_4820.json') as file:
+    with open('threads/26_4699.json') as file:
         thread = json.load(file)
     text = thread['answers'][0]['content']
     print(text)
     route = find_route(text, prep)
+
+    for elem in route:
+        print(elem)
+    print('FILTERED')
+    route = filter_objects(route)
     draw_route(route)
 
     for elem in route:
