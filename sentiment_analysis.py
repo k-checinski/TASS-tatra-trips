@@ -62,6 +62,12 @@ def thread_sentiment_score(thread: dict, sentiment_dict: Dict[str, int], morf: m
     return final_score
 
 
+def get_thread_sentiment_score(thread, path='resources/sentiment.json'):
+    morf = morfeusz2.Morfeusz()
+    sem_dict = load_sentiment_dict(path)
+    return thread_sentiment_score(thread, sem_dict, morf)
+
+
 def main():
     morf = morfeusz2.Morfeusz()
     sem_dict = load_sentiment_dict(sys.argv[1])
