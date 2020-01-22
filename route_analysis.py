@@ -1,6 +1,8 @@
 from typing import Set, List
 from math import sqrt
+import os
 
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -86,7 +88,8 @@ def find_next_object(text_lemmas_sets, start_pos, objects_dict):
 
 
 def dist(a, b):
-    return sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
+    return sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+
 
 def dist_obj(a, b):
     a_pos = get_coords(a)
@@ -134,12 +137,11 @@ def filter_far_objects(route, min_filtering_distance=10000.0):
         filtered_route.append(route[1])
         start_pos = 2
     filtered_route = [route[0]]
-    for a, b in zip(route[start_pos:], route[start_pos+1:]):
+    for a, b in zip(route[start_pos:], route[start_pos + 1:]):
         a_coords = get_coords(a)
         b_coords = get_coords(b)
         prev_coords = get_coords(filtered_route[-1])
         a_prev_dist = dist(prev_coords, a_coords)
-        print(a_prev_dist, a['name'], b['name'])
         if a_prev_dist < dist(prev_coords, b_coords) or a_prev_dist < min_filtering_distance:
             filtered_route.append(a)
     filtered_route.append(route[-1])
@@ -174,9 +176,25 @@ def find_route(text, objects_dict, duplicates_filtering_window=0,
     route = filter_variants(route)
     if far_objects_filtering_dist > 0:
         route = filter_far_objects(route, far_objects_filtering_dist)
+        route = filter_far_objects(route, far_objects_filtering_dist)
     if duplicates_filtering_window != 0:
         route = filter_duplicates(route, duplicates_filtering_window)
     return route
+
+
+def split_route(route, max_dist):
+    if len(route) <= 1:
+        return [route]
+    subroutes = []
+    new_subroute = [route[0]]
+    for object in route[1:]:
+        d = dist_obj(new_subroute[-1], object)
+        if d > max_dist:
+            subroutes.append(new_subroute)
+            new_subroute = []
+        new_subroute.append(object)
+    subroutes.append(new_subroute)
+    return subroutes
 
 
 def draw_route(objects):
@@ -194,29 +212,51 @@ def draw_route(objects):
                      textcoords="offset points",  # how to position the text
                      xytext=(0, 10),  # distance from text to points (x,y)
                      ha='center')
-    plt.show()
 
 
-if __name__ == '__main__':
-    import json
+def process_all_threads(duplicates_filtering_window=3, far_objects_filtering_dist=0.015,
+                        splitting_min_dist=0.056, threads_dir='threads'):
     with open('resources/geo.json', 'r') as file:
         objs = json.load(file)
     prep = prepare_objects(objs)
-    with open('threads/13_4822.json') as file:
-        thread = json.load(file)
-    text = thread['answers'][0]['content']
-    # text = "Wyruszyliśmy z Kuźnic, przez Dolinę Jaworzynki dotarliśmy do Murowańca i dalej nad Czarny Staw Gąsienicowy. " \
-    # "Wdrapaliśmy się na Karb, zdobyliśmy Kościelec i zeszliśmy na Karb i drugą stroną wróciliśmy przez Murowaniec i Boczań do Kuźnic."
-    print(text)
-    route = find_route(text, prep, 3, 0.015)
-    draw_route(route)
+    routes = []
+    filenames = os.listdir(threads_dir)
+    for filename in filenames:
+        if not filename.endswith('.json'):
+            continue
+        with open(os.path.join('threads', filename)) as file:
+            thread = json.load(file)
+        print(len(thread['answers']))
+        if len(thread['answers']) == 0:
+            continue
+        text = thread['answers'][0]['content']
+        route = find_route(text, prep, duplicates_filtering_window, far_objects_filtering_dist)
+        route = filter_duplicates(route, 1)
+        subroutes = split_route(route, splitting_min_dist)
+        routes.append(subroutes)
+    return routes, filenames
 
-    for i, elem in enumerate(route):
-        print(F'{i+1}. {elem["name"]}')
-    print('FILTERED')
 
-    # route = filter_duplicates(route, 1)
-    # draw_route(route)
+def sections_length(routes):
+    sections_lengths = []
+    for route in routes:
+        for a, b in zip(route, route[1:]):
+            sections_lengths.append(dist_obj(a, b))
+    return sections_lengths
 
-    for elem in route:
-        print(elem)
+
+def draw_routes(routes, names):
+    for route, name in zip(routes, names):
+        if isinstance(route[0], list):
+            for subroute in route:
+                draw_route(subroute)
+        else:
+            draw_route(route)
+        plt.title(name)
+        plt.savefig(name + '.png')
+        plt.clf()
+
+
+if __name__ == '__main__':
+    routes, filenames = process_all_threads()
+    draw_routes(routes, [name.split('.')[0] for name in filenames])
