@@ -21,7 +21,6 @@ def add_route_to_graph(routes_graph, route, author_score, sentiment_score):
             routes_graph.nodes[obj['name']]['dict_attr']['sentiment_score'] += sentiment_score
             routes_graph.nodes[obj['name']]['dict_attr']['total_score'] += author_score + sentiment_score
             routes_graph.nodes[obj['name']]['dict_attr']['author_score'] += author_score
-            print('node already in graph')
         else:
             object_info['coords'] = obj['coords']
             routes_graph.add_node(obj['name'], dict_attr=copy.deepcopy(object_info))
@@ -58,7 +57,6 @@ def build_routes_graph(threads_dir='resources/threads'):
         text = thread['answers'][0]['content']
 
         routes = find_route(text, prep, duplicates_filtering_window, far_objects_filtering_dist, splitting_min_dist)
-        print(len(routes))
         author_name = thread['thread_info']['author']
         author_authority = get_user_authority(users_graph, author_name)
         sentiment_score = get_thread_sentiment_score(thread)
@@ -106,13 +104,14 @@ def BFS(graph, start, max_depth=5, max_distance=25):
             best_path_last_vertex = (vertex, score[vertex])
         if vertex not in visited_nodes and level[vertex] < max_depth:
             visited_nodes.add(vertex)
-            queue.extend(graph.neighbors(vertex))
+
             for neighbour in graph.neighbors(vertex):
 
                 if neighbour not in visited_nodes and dist_obj_km(graph.nodes[neighbour]['dict_attr'],
                                                                   graph.nodes[start]['dict_attr']) <= max_distance:
                     parents[neighbour] = vertex
                     level[neighbour] = level[vertex] + 1
+                    queue.append(neighbour)
             print(vertex)
 
     vertex_on_path = best_path_last_vertex[0]
