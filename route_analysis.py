@@ -42,6 +42,37 @@ def process_word(word_result):
     return info
 
 
+def find_special_words(text_position):
+    if 'przez' in text_position:
+        return ['przez']
+    return None
+
+
+def swap_elements(route, window=2):
+    for i, objs in enumerate(route[1:-1]):
+        i = i + 1
+        if len(objs) != 1 or objs[0][0]['name'] != ['przez']:
+            continue
+        mid = objs[0][1]
+        a = mid - window
+        b = mid + window
+        objs_before = None
+        if route[i - 1][0][1] >= a:
+            objs_before = route[i - 1]
+        objs_after = None
+        if route[i + 1][0][1] <= b:
+            objs_after = route[i + 1]
+        if objs_before is not None and objs_after is not None:
+            print(objs_before, 'przez', objs_after)
+            route[i - 1] = objs_after
+            route[i + 1] = objs_before
+    final_route = []
+    for objs in route:
+        if objs[0][0]['name'] != ['przez']:
+            final_route.append([o[0] for o in objs])
+    return final_route
+
+
 def prepare_text(text: str, morf: morfeusz2.Morfeusz) -> List[Set[str]]:
     analysed_text = morf.analyse(text)
     pos = 0
@@ -51,7 +82,7 @@ def prepare_text(text: str, morf: morfeusz2.Morfeusz) -> List[Set[str]]:
         part_of_speech = morf_tuple[2][2].split(':')[0]
         if part_of_speech in ['interj', 'conj', 'part', 'siebie',
                               'fin', 'bedzie', 'aglt', 'impt', 'imps',
-                              'inf', 'winien', 'pred', 'prep', 'comp',
+                              'inf', 'winien', 'pred', 'comp',
                               'interj', 'interp']:
             continue
         if morf_tuple[0] != pos:
@@ -70,6 +101,10 @@ def prepare_text(text: str, morf: morfeusz2.Morfeusz) -> List[Set[str]]:
 
 def find_next_object(text_lemmas_sets, start_pos, objects_dict):
     matches = []
+    special_word = find_special_words(text_lemmas_sets[start_pos])
+    if special_word is not None:
+        matches.append(({'name': special_word}, 1, start_pos))
+        return matches
     for object in objects_dict:
         current_pos = start_pos
         match_count = 0
@@ -84,7 +119,7 @@ def find_next_object(text_lemmas_sets, start_pos, objects_dict):
             if current_pos >= len(text_lemmas_sets):
                 break
         if match_count == len(object['keywords']) or sufficient_matched:
-            matches.append((copy.deepcopy(object), match_count))
+            matches.append((copy.deepcopy(object), match_count, start_pos))
     return matches
 
 
@@ -166,14 +201,14 @@ def find_route(text, objects_dict, duplicates_filtering_window=0,
         if len(matches) == 0:
             pos += 1
             continue
-        objects, lengths = zip(*matches)
+        objects, lengths, positions = zip(*matches)
         max_length = max(lengths)
         pos += max_length
-        route.append([m[0] for m in matches if m[1] == max_length])
+        route.append([(m[0], m[2]) for m in matches if m[1] == max_length])
+    route = swap_elements(route)
     route = filter_variants(route)
     remove_needless_fields(route)
     if far_objects_filtering_dist > 0:
-        route = filter_far_objects(route, far_objects_filtering_dist)
         route = filter_far_objects(route, far_objects_filtering_dist)
     if duplicates_filtering_window != 0:
         route = filter_duplicates(route, duplicates_filtering_window)
@@ -229,15 +264,15 @@ def process_all_threads(duplicates_filtering_window=3, far_objects_filtering_dis
     prep = prepare_objects(objs)
     routes = []
     filenames = os.listdir(threads_dir)
-    for filename in filenames[:5]:
+    for filename in filenames:
         if not filename.endswith('.json'):
             continue
         with open(os.path.join('threads', filename)) as file:
             thread = json.load(file)
-        print(len(thread['answers']))
         if len(thread['answers']) == 0:
             continue
         text = thread['answers'][0]['content']
+        print(filename)
         route = find_route(text, prep, duplicates_filtering_window, far_objects_filtering_dist, splitting_min_dist)
         routes.append(route)
     return routes, filenames
