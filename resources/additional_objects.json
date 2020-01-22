@@ -1,0 +1,56 @@
+[
+  {
+    "name": "Kuźnice",
+    "type": "miasto",
+    "latitude": 49.281111111,
+    "longitude": 19.981111111
+  },
+    {
+    "name": "Schronisko Hala Kondratowa",
+    "type": "schronisko",
+    "latitude": 49.2486111111111,
+    "longitude": 19.9519444444444
+  },
+  {
+    "name": "Schronisko PTTK na Hali Ornak",
+    "type": "schronisko",
+    "latitude": 49.2291666666667,
+    "longitude": 19.85875
+  },
+    {
+    "name": "Schronisko w Dolinie Pięciu Stawów Polskich",
+    "type": "schronisko",
+    "latitude": 49.2136111111111,
+    "longitude": 20.04875
+  },
+  {
+    "name": "Schronisko w Dolinie Roztoki",
+    "type": "schronisko",
+    "latitude": 49.2336944444445,
+    "longitude": 20.0956388888889
+  },
+    {
+    "name": "Schronisko Morskie Oko",
+    "type": "schronisko",
+    "latitude": 49.2013888888889,
+    "longitude": 20.0713055555556
+  },
+  {
+    "name": "Schronisko Polanie Chochołowskiej",
+    "type": "schronisko",
+    "latitude": 49.2363055555556,
+    "longitude": 19.7878055555556
+  },
+  {
+    "name": "Schronisko Głodówka",
+    "type": "schronisko",
+    "latitude": 49.3020555555556,
+    "longitude": 20.11675
+  },
+  {
+    "name": "Murowaniec",
+    "type": "schronisko",
+    "latitude": 49.2435,
+    "longitude": 20.0072222222222
+  }
+]

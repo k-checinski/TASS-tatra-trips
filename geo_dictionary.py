@@ -24,11 +24,11 @@ def main():
 
             object_name = row["nazwa główna"]
 
-            if object_name in distinct_names:
+            if object_name in distinct_names or object_name in constants.REJECTED_OBJECTS:
                 continue
 
             object_type = row["rodzaj obiektu"]
-            if object_type in constants.REJECTED_OBJECT_TYPES:
+            if not set(object_type.split(':')).isdisjoint(constants.REJECTED_OBJECT_TYPES):
                 continue
 
             object_latitude = row["szerokość geograficzna"]
@@ -39,16 +39,19 @@ def main():
                 geo_items.append(geo_object)
                 distinct_names.append(object_name)
 
-    api = overpy.Overpass()
-    results = api.query("""way["tourism"="alpine_hut"](49,19.1,49.34,20.2);out;""")
-    for result in results.ways:
-        if result.tags.get("addr:country") == constants.SLOVAKIA_CODE:
-            continue
-        name = result.tags.get("name")
-        geo_items.append(GeoItem(name, constants.TOURIST_SHELTER))
+    with open('resources/additional_objects.json', 'r') as file:
+        additional_objects = json.load(file)
+
+    # api = overpy.Overpass()
+    # results = api.query("""way["tourism"="alpine_hut"](49,19.1,49.34,20.2);out;""")
+    # for result in results.ways:
+    #     if result.tags.get("addr:country") == constants.SLOVAKIA_CODE:
+    #         continue
+    #     name = result.tags.get("name")
+    #     geo_items.append(GeoItem(name, constants.TOURIST_SHELTER))
 
     with open('resources/geo.json', 'w') as outfile:
-        json.dump(geo_items, outfile, cls=MyEncoder, ensure_ascii=False)
+        json.dump(geo_items + additional_objects, outfile, cls=MyEncoder, ensure_ascii=False)
 
 
 if __name__ == '__main__':
