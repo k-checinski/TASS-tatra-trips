@@ -283,7 +283,7 @@ def process_all_threads(duplicates_filtering_window=3, far_objects_filtering_dis
         print(f'{i+1}/{len(filenames)}:\t{filename}')
         if not filename.endswith('.json'):
             continue
-        with open(os.path.join('threads', filename)) as file:
+        with open(os.path.join('resources/threads', filename)) as file:
             thread = json.load(file)
         if len(thread['answers']) == 0:
             print('EMPTY THREAD')
