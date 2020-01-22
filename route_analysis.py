@@ -10,7 +10,7 @@ from pl_stemmer import stem
 
 def is_sufficient(prepared_tuple):
     part_of_speech = prepared_tuple[1].split(':')[0]
-    return part_of_speech in ['ign'] or 'nazwa_geograficzna' in prepared_tuple[2]
+    return part_of_speech in ['ign']
 
 
 def prepare_objects(terms):
@@ -88,6 +88,11 @@ def find_next_object(text_lemmas_sets, start_pos, objects_dict):
 def dist(a, b):
     return sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
 
+def dist_obj(a, b):
+    a_pos = get_coords(a)
+    b_pos = get_coords(b)
+    return dist(a_pos, b_pos)
+
 
 def get_coords(obj):
     return obj['latitude'], obj['longitude']
@@ -96,13 +101,21 @@ def get_coords(obj):
 def filter_variants(route):
     if len(route) == 0:
         return []
-    filtered_route = [route[0][0]]
+    if len(route) == 1:
+        return [route[0][0]]
+    init_obj, init_dist = route[0][0], dist_obj(route[0][0], route[1][0])
+    for a in route[0]:
+        for b in route[1]:
+            ab_dist = dist(get_coords(a), get_coords(b))
+            if ab_dist < init_dist:
+                init_dist = ab_dist
+                init_obj = a
+    filtered_route = [init_obj]
     for elem in route[1:]:
         if len(elem) == 1:
             filtered_route.append(elem[0])
             continue
-        prev_coords = get_coords(filtered_route[-1])
-        distances = [dist(prev_coords, get_coords(variant)) for variant in elem]
+        distances = [dist_obj(filtered_route[-1], variant) for variant in elem]
         nearest = elem[np.argmin(distances)]
         filtered_route.append(nearest)
     return filtered_route
@@ -111,8 +124,17 @@ def filter_variants(route):
 def filter_far_objects(route, min_filtering_distance=10000.0):
     if len(route) == 0:
         return []
+    if len(route) <= 2:
+        return route
+    filtered_route = []
+    start_pos = 1
+    if dist_obj(route[0], route[1]) > dist_obj(route[0], route[2]):
+        filtered_route.append(route[0])
+    else:
+        filtered_route.append(route[1])
+        start_pos = 2
     filtered_route = [route[0]]
-    for a, b in zip(route[1:], route[2:]):
+    for a, b in zip(route[start_pos:], route[start_pos+1:]):
         a_coords = get_coords(a)
         b_coords = get_coords(b)
         prev_coords = get_coords(filtered_route[-1])
@@ -135,7 +157,7 @@ def filter_duplicates(route, window_size=1):
 
 
 def find_route(text, objects_dict, duplicates_filtering_window=0,
-               far_objects_filtering_dist=0):
+               far_objects_filtering_dist=0.0):
     pos = 0
     morf = morfeusz2.Morfeusz()
     sets = prepare_text(text, morf)
@@ -180,21 +202,21 @@ if __name__ == '__main__':
     with open('resources/geo.json', 'r') as file:
         objs = json.load(file)
     prep = prepare_objects(objs)
-    with open('threads/19_4774.json') as file:
+    with open('threads/13_4822.json') as file:
         thread = json.load(file)
     text = thread['answers'][0]['content']
     # text = "Wyruszyliśmy z Kuźnic, przez Dolinę Jaworzynki dotarliśmy do Murowańca i dalej nad Czarny Staw Gąsienicowy. " \
     # "Wdrapaliśmy się na Karb, zdobyliśmy Kościelec i zeszliśmy na Karb i drugą stroną wróciliśmy przez Murowaniec i Boczań do Kuźnic."
     print(text)
-    route = find_route(text, prep)
+    route = find_route(text, prep, 3, 0.015)
     draw_route(route)
 
-    for elem in route:
-        print(elem)
+    for i, elem in enumerate(route):
+        print(F'{i+1}. {elem["name"]}')
     print('FILTERED')
 
-    route = filter_duplicates(route, 1)
-    draw_route(route)
+    # route = filter_duplicates(route, 1)
+    # draw_route(route)
 
     for elem in route:
         print(elem)
