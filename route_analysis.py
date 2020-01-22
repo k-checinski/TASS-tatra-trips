@@ -1,5 +1,6 @@
-from typing import Set, List
+import copy
 from math import sqrt
+from typing import Set, List
 import os
 
 import json
@@ -83,7 +84,7 @@ def find_next_object(text_lemmas_sets, start_pos, objects_dict):
             if current_pos >= len(text_lemmas_sets):
                 break
         if match_count == len(object['keywords']) or sufficient_matched:
-            matches.append((object, match_count))
+            matches.append((copy.deepcopy(object), match_count))
     return matches
 
 
@@ -170,6 +171,7 @@ def find_route(text, objects_dict, duplicates_filtering_window=0,
         pos += max_length
         route.append([m[0] for m in matches if m[1] == max_length])
     route = filter_variants(route)
+    remove_needless_fields(route)
     if far_objects_filtering_dist > 0:
         route = filter_far_objects(route, far_objects_filtering_dist)
         route = filter_far_objects(route, far_objects_filtering_dist)
@@ -179,6 +181,12 @@ def find_route(text, objects_dict, duplicates_filtering_window=0,
     if splitting_min_dist is not None:
         route = split_route(route, splitting_min_dist)
     return route
+
+
+def remove_needless_fields(route):
+    for obj in route:
+        del obj['keywords']
+        del obj['type']
 
 
 def split_route(route, max_dist):
@@ -221,7 +229,7 @@ def process_all_threads(duplicates_filtering_window=3, far_objects_filtering_dis
     prep = prepare_objects(objs)
     routes = []
     filenames = os.listdir(threads_dir)
-    for filename in filenames:
+    for filename in filenames[:5]:
         if not filename.endswith('.json'):
             continue
         with open(os.path.join('threads', filename)) as file:
