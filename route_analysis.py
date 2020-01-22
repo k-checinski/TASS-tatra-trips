@@ -159,7 +159,7 @@ def filter_duplicates(route, window_size=1):
 
 
 def find_route(text, objects_dict, duplicates_filtering_window=0,
-               far_objects_filtering_dist=0.0):
+               far_objects_filtering_dist=0.0, splitting_min_dist=None):
     pos = 0
     morf = morfeusz2.Morfeusz()
     sets = prepare_text(text, morf)
@@ -179,6 +179,9 @@ def find_route(text, objects_dict, duplicates_filtering_window=0,
         route = filter_far_objects(route, far_objects_filtering_dist)
     if duplicates_filtering_window != 0:
         route = filter_duplicates(route, duplicates_filtering_window)
+    route = filter_duplicates(route, 1)
+    if splitting_min_dist is not None:
+        route = split_route(route, splitting_min_dist)
     return route
 
 
@@ -230,10 +233,8 @@ def process_all_threads(duplicates_filtering_window=3, far_objects_filtering_dis
         if len(thread['answers']) == 0:
             continue
         text = thread['answers'][0]['content']
-        route = find_route(text, prep, duplicates_filtering_window, far_objects_filtering_dist)
-        route = filter_duplicates(route, 1)
-        subroutes = split_route(route, splitting_min_dist)
-        routes.append(subroutes)
+        route = find_route(text, prep, duplicates_filtering_window, far_objects_filtering_dist, splitting_min_dist)
+        routes.append(route)
     return routes, filenames
 
 
