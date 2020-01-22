@@ -1,13 +1,13 @@
 import copy
-from math import sqrt
-from typing import Set, List
-import os
-
 import json
-import numpy as np
-import matplotlib.pyplot as plt
+import os
+from math import sqrt, fabs, sin, atan2, cos
+from typing import Set, List
 
+import matplotlib.pyplot as plt
 import morfeusz2
+import numpy as np
+
 from pl_stemmer import stem
 
 
@@ -131,6 +131,19 @@ def dist_obj(a, b):
     a_pos = a['coords']
     b_pos = b['coords']
     return dist(a_pos, b_pos)
+
+
+def dist_obj_km(a, b):
+    return (dist_obj(a, b) / 3600) * 40000
+
+
+def true_dist(a, b):
+    d1 = fabs(a[0] - b[0])
+    d2 = fabs(a[1] - b[1])
+    a = sin(d1 / 2) ** 2 + cos(a[0]) * cos(b[0]) * (sin(d2 / 2) ** 2)
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    d = 6371 * c
+    return d
 
 
 def filter_variants(route):
