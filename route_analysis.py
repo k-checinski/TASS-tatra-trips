@@ -264,18 +264,22 @@ def process_all_threads(duplicates_filtering_window=3, far_objects_filtering_dis
     prep = prepare_objects(objs)
     routes = []
     filenames = os.listdir(threads_dir)
-    for filename in filenames:
+    processed_filenames = []
+    # filenames = ['376_80.json']
+    for i, filename in enumerate(filenames):
+        print(f'{i+1}/{len(filenames)}:\t{filename}')
         if not filename.endswith('.json'):
             continue
         with open(os.path.join('threads', filename)) as file:
             thread = json.load(file)
         if len(thread['answers']) == 0:
+            print('EMPTY THREAD')
             continue
         text = thread['answers'][0]['content']
-        print(filename)
         route = find_route(text, prep, duplicates_filtering_window, far_objects_filtering_dist, splitting_min_dist)
         routes.append(route)
-    return routes, filenames
+        processed_filenames.append(filename)
+    return routes, processed_filenames
 
 
 def sections_length(routes):
