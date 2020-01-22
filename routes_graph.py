@@ -23,7 +23,6 @@ def add_route_to_graph(routes_graph, route, author_score, sentiment_score):
             routes_graph.nodes[obj['name']]['dict_attr']['sentiment_score'] += sentiment_score
             routes_graph.nodes[obj['name']]['dict_attr']['total_score'] += author_score + sentiment_score
             routes_graph.nodes[obj['name']]['dict_attr']['author_score'] += author_score
-            print('node already in graph')
         else:
             object_info['coords'] = obj['coords']
             routes_graph.add_node(obj['name'], dict_attr=copy.deepcopy(object_info))
@@ -60,7 +59,6 @@ def build_routes_graph(threads_dir='resources/threads'):
         text = thread['answers'][0]['content']
 
         routes = find_route(text, prep, duplicates_filtering_window, far_objects_filtering_dist, splitting_min_dist)
-        print(len(routes))
         author_name = thread['thread_info']['author']
         author_authority = get_user_authority(users_graph, author_name)
         sentiment_score = get_thread_sentiment_score(thread)
