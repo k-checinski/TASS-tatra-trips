@@ -29,7 +29,7 @@ def prepare_objects(terms):
             forms = set([r[0].split(':')[0].lower() for r in prepared_result])
             prepared_words.append((forms, any([is_sufficient(t) for t in prepared_result])))
         prepared_objects.append({'name': term['name'], 'keywords': prepared_words, 'type': term['type'],
-                                 'latitude': term['latitude'], 'longitude': term['longitude']})
+                                 'coords': (term['latitude'], term['longitude'])})
     return prepared_objects
 
 
@@ -92,13 +92,9 @@ def dist(a, b):
 
 
 def dist_obj(a, b):
-    a_pos = get_coords(a)
-    b_pos = get_coords(b)
+    a_pos = a['coords']
+    b_pos = b['coords']
     return dist(a_pos, b_pos)
-
-
-def get_coords(obj):
-    return obj['latitude'], obj['longitude']
 
 
 def filter_variants(route):
@@ -109,7 +105,7 @@ def filter_variants(route):
     init_obj, init_dist = route[0][0], dist_obj(route[0][0], route[1][0])
     for a in route[0]:
         for b in route[1]:
-            ab_dist = dist(get_coords(a), get_coords(b))
+            ab_dist = dist_obj(a, b)
             if ab_dist < init_dist:
                 init_dist = ab_dist
                 init_obj = a
@@ -138,9 +134,9 @@ def filter_far_objects(route, min_filtering_distance=10000.0):
         start_pos = 2
     filtered_route = [route[0]]
     for a, b in zip(route[start_pos:], route[start_pos + 1:]):
-        a_coords = get_coords(a)
-        b_coords = get_coords(b)
-        prev_coords = get_coords(filtered_route[-1])
+        a_coords = a['coords']
+        b_coords = b['coords']
+        prev_coords = filtered_route[-1]['coords']
         a_prev_dist = dist(prev_coords, a_coords)
         if a_prev_dist < dist(prev_coords, b_coords) or a_prev_dist < min_filtering_distance:
             filtered_route.append(a)
@@ -205,8 +201,9 @@ def draw_route(objects):
     ys = []
     names = []
     for obj in objects:
-        xs.append(obj['longitude'])
-        ys.append(obj['latitude'])
+        coords = obj['coords']
+        xs.append(coords[1])
+        ys.append(coords[0])
         names.append(obj['name'])
     plt.plot(xs, ys, '-o')
     for x, y, label in zip(xs, ys, names):
